@@ -80,8 +80,10 @@ class TwoLayerNet(object):
         # shape (N, C).                                                             #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        scores = X.dot(W1)
-        scores = np.maximum(scores+b1,np.zeros(scores.shape)).dot(W2)+b2
+        first = X.dot(W1)+b1
+        second = np.maximum(np.zeros(first.shape),first)
+        third = second.dot(W2)+b2
+        scores = third
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
@@ -98,11 +100,10 @@ class TwoLayerNet(object):
         # classifier loss.                                                          #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        loss_matrix = scores-np.max(scores,axis = 1, keepdims = True)
-        loss_matrix = np.exp(loss_matrix)
-        loss_matrix /= np.sum(loss_matrix,axis = 1,keepdims = True)
-        loss = np.sum(-np.log(loss_matrix[np.arange(0,num_train),y]))
-        loss /= num_train
+        exp_scores = np.exp(scores-np.max(scores,axis = 1, keepdims = True))
+        step2 = exp_scores/np.sum(exp_scores,axis = 1,keepdims = True)
+        log_prob = -np.log(step2[np.arange(0,num_train),y])
+        loss = np.sum(log_prob)/num_train
         loss += reg*(np.sum(W1*W1)+np.sum(W2*W2))
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -115,15 +116,20 @@ class TwoLayerNet(object):
         # grads['W1'] should store the gradient on W1, and be a matrix of same size #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-        #print(b1.shape)
-        #print( W2[np.arange(0,num_train),y] )
-        #grads['b1'] = W2[np.arange(0,num_train),y] 
-        print(X.shape)
-        print(scores.shape)
-        print(W1.shape)
-        print(W2.shape)
+        dscores = step2
+        dscores[np.arange(0,num_train),y] -= 1
+        dscores /= num_train
+        dfirst_layer = np.dot(dscores,W2.T)
+        dfirst_layer[first<=0] = 0
+        dW1 = np.dot(X.T,dfirst_layer)
+        grads['W2'] = np.dot(second.T,dscores) #doesn't work
+        grads['W1'] = dW1 #doesn't work
+        grads['W2'] += reg*W2
+        grads['W1'] += reg*W1
         
         
+        
+    
         
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
