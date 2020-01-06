@@ -258,10 +258,10 @@ class TwoLayerNet(object):
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
-            self.params['W1'] = -learning_rate*grads['W1']
-            self.params['W2'] = -learning_rate*grads['W2']
-            self.params['b1'] = -learning_rate*grads['b1']
-            self.params['b2'] = -learning_rate*grads['b2']
+            self.params['W1'] += -learning_rate*grads['W1']
+            self.params['W2'] += -learning_rate*grads['W2']
+            self.params['b1'] += -learning_rate*grads['b1']
+            self.params['b2'] += -learning_rate*grads['b2']
 
             # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
 
